@@ -5,11 +5,19 @@ int square(int x) {
     return x * x;
 }
 
+double triangle(int h, int n) {
+    return h * n / 2;
+}
+
 int main() {
     // Запрашиваем у пользователя параметры и возвращаем результат работы функции
     std::cout << "Введите длину стороны квадрата\n";
     int a = 0;
     std::cin >> a;
     std::cout << "Площадь квадрата: " << square(a) << '\n';
+    std::cout << "Введите длину высоты, и стороны треугольника, на которую падает эта высота\n";
+    int high = 0, side = 0;
+    std::cin >> high >> side;
+    std::cout << "Площадь треугольника: " << triangle(high, side);
     return 0;
 }
