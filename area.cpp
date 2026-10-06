@@ -5,7 +5,7 @@ int square(int x) {
     return x * x;
 }
 
-double triangle(int h, int n) {
+double triangle(double h, double n) {
     /*
     Возвращаем площадь треугольника
 
@@ -26,7 +26,7 @@ int main() {
     std::cin >> a;
     std::cout << "Площадь квадрата: " << square(a) << '\n';
     std::cout << "Введите длину высоты, и стороны треугольника, на которую падает эта высота\n";
-    int high = 0, side = 0;
+    double high = 0, side = 0;
     std::cin >> high >> side;
     std::cout << "Площадь треугольника: " << triangle(high, side);
     return 0;
