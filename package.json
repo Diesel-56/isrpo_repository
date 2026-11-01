@@ -34,6 +34,10 @@
       {
         "command": "timer-for-work.showStats",
         "title": "Timer for work: Статистика по проектам"
+      },
+      {
+        "command": "timer-for-work.clearStats",
+        "title": "Timer for work: Очистить статистику"
       }
     ],
     "configuration": {

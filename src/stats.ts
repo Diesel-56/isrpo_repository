@@ -1,17 +1,23 @@
+import * as vscode from 'vscode';
+
 interface StatsData {
 	projects: { [name: string]: number };
 	days: { [date: string]: { seconds: number; cycles: number } };
 }
 
+// ключ, под которым данные лежат в хранилище VS Code
+const KEY = 'timerForWork.stats';
+
 // Учёт статистики
 export class Stats{
     private data: StatsData;
 
-    constructor() {
-        this.data = { projects: {}, days: {} };
+    constructor(private storage: vscode.Memento) {
+        // загружаем прошлую статистику
+        this.data = storage.get<StatsData>(KEY, { projects: {}, days: {} });
     }
 
-    // Сегодняшняя дата
+    // сегодняшняя дата
     private today(): string {
 		const d = new Date();
 		return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
@@ -47,6 +53,17 @@ export class Stats{
 
 	getTodayCycles(): number {
 		return this.getDay().cycles;
+	}
+
+    // сохраняем в хранилище VS Code
+	save() {
+		this.storage.update(KEY, this.data);
+	}
+
+	// удаляем всю статистику
+	clear() {
+		this.data = { projects: {}, days: {} };
+		this.save();
 	}
 
     static formatHours(sec: number): string {

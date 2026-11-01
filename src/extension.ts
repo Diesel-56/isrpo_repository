@@ -59,6 +59,7 @@ function updateStatusBar() {
 		statusBar.command = 'timer-for-work.pause';
 		statusBar.tooltip = 'Проект: ' + getProjectName() + '. Нажмите для паузы';
 	}
+	stats.save();
 	statusBar.text = text;
 }
 
@@ -112,6 +113,7 @@ function tick() {
 	if (secondsLeft <= 0) {
 		if (mode === 'work') {
 			stats.addCycle();
+			stats.save();
 			mode = 'break';
 			secondsLeft = config.break * 60;
 			vscode.window.showInformationMessage('Работа закончена! Время отдохнуть ' + config.break + ' мин.');
@@ -121,7 +123,9 @@ function tick() {
 			vscode.window.showInformationMessage('Отдых закончен, возвращаемся к работе!');
 		}
 	}
-
+	if (secondsLeft % 30 === 0) {
+		stats.save();
+	}
 	updateStatusBar();
 }
 
@@ -199,9 +203,17 @@ function showStats() {
 	vscode.window.showQuickPick(items, { title: 'Timer for work - время по проектам' });
 }
 
+async function clearStats() {
+	const answer = await vscode.window.showWarningMessage('Удалить всю статистику?', 'Да', 'Нет');
+	if (answer === 'Да') {
+		stats.clear();
+		vscode.window.showInformationMessage('Статистика очищена');
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Timer for work запущен');
-	stats = new Stats();
+	stats = new Stats(context.globalState);
 
 	secondsLeft = getConfig().work * 60;
 
@@ -217,7 +229,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('timer-for-work.pause', pauseTimer),
 		vscode.commands.registerCommand('timer-for-work.stop', resetTimer),
 		vscode.commands.registerCommand('timer-for-work.setIntervals', setIntervals),
-		vscode.commands.registerCommand('timer-for-work.showStats', showStats)
+		vscode.commands.registerCommand('timer-for-work.showStats', showStats),
+		vscode.commands.registerCommand('timer-for-work.clearStats', clearStats)
 	);
 
 	// следим за действиями пользователя
@@ -245,5 +258,8 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	if (interval) {
 		clearInterval(interval);
+	}
+	if (stats) {
+		stats.save();
 	}
 }
