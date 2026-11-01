@@ -26,8 +26,29 @@
       {
         "command": "timer-for-work.stop",
         "title": "Timer for work: Сброс"
+      },
+      {
+        "command": "timer-for-work.setIntervals",
+        "title": "Timer for work: Настроить интервалы"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Timer for work",
+      "properties": {
+        "timerForWork.workMinutes": {
+          "type": "number",
+          "default": 25,
+          "minimum": 1,
+          "description": "Длительность работы (в минутах)"
+        },
+        "timerForWork.breakMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "description": "Длительность отдыха (в минутах)"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
