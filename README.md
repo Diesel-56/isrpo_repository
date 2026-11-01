@@ -55,11 +55,31 @@ vsce package
 
 Получится `timer-for-work-0.0.1.vsix`, его можно установить через Extensions -> `...` -> Install from VSIX.
 
-## Структура
+## Структура проекта
 
 ```
-src/
-  extension.ts   - основной код: таймер, строка состояния, команды, отслеживание активности
-  stats.ts       - класс Stats: учёт времени по проектам и сохранение
-package.json     - манифест (команды, настройки, события активации)
+isrpo_repository/ (ветка lab3)
+|-- .vscode/
+|    |-- extensions.json    // рекомендуемые расширения
+|    |-- launch.json        // запуск плагина по F5
+|    |-- settings.json      // настройки редактора для проекта
+|    |-- tasks.json         // задача сборки
+|-- src/
+|    |-- test/
+|    |    |-- extension.test.ts  // тест (шаблон от генератора)
+|    |-- extension.ts       // основной код: таймер, строка состояния, команды, автопауза
+|    |-- stats.ts           // класс Stats: учёт времени по проектам и сохранение
+|-- .gitignore             // что не добавлять в git
+|-- .vscode-test.mjs       // настройки запуска тестов
+|-- .vscodeignore          // что не включать в .vsix
+|-- CHANGELOG.md           // история изменений
+|-- README.md              // описание плагина
+|-- eslint.config.mjs      // настройки проверки кода ESLint
+|-- package-lock.json      // точные версии зависимостей
+|-- package.json           // манифест: команды, настройки, события активации
+|-- tsconfig.json          // настройки TypeScript
 ```
+
+## Ссылка на репозиторий в GitHub
+Лабораторная работа №3:
+https://github.com/Diesel-56/isrpo_repository/tree/lab3
