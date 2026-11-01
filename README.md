@@ -1,71 +1,65 @@
-# timer-for-work README
+# Timer for work
 
-This is the README for your extension "timer-for-work". After writing up a brief description, we recommend including the following sections.
+**Автор:** Шувалов Михаил Робертович, группа М3110
 
-## Features
+Лабораторная работа №3 по дисциплине «Инструментальные средства разработки программного обеспечения».
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Timer for work - плагин для VS Code, который помогает чередовать работу и отдых (как техника "Pomodoro") и считает, сколько времени потрачено на каждый проект.
 
-For example if there is an image subfolder under your extension project workspace:
+## Возможности
 
-\!\[feature X\]\(images/feature-x.png\)
+1. **Настройка интервалов** - можно задать, сколько минут работать и сколько отдыхать. Через команду `Timer for work: Настроить интервалы` или в настройках VS Code (`Settings` -> поиск `timerForWork`).
+2. **Интеграция с VS Code**
+   - таймер показывается в строке состояния внизу справа, например `Работа 24:13` или `Отдых 04:59`;
+   - клик по таймеру запускает его или ставит на паузу;
+   - все действия доступны через палитру команд;
+   - когда интервал закончился, приходит уведомление.
+3. **Отслеживание активности** - если во время работы ничего не делать в редакторе (не печатать, не двигать курсор, не переключать файлы) дольше заданного времени (по умолчанию 3 минуты), таймер сам встаёт на паузу. Как только снова начинаешь работать - таймер продолжает идти.
+4. **Учёт времени по проектам** - время работы записывается отдельно для каждого открытого проекта (папки). Посмотреть можно командой `Timer for work: Статистика по проектам`.
+5. **Сохранение данных** - статистика сохраняется в хранилище VS Code (`globalState`), поэтому не пропадает после перезапуска редактора.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Команды
 
-## Requirements
+| Команда | Что делает |
+|---|---|
+| `Timer for work: Старт / продолжить` | запускает таймер |
+| `Timer for work: Пауза` | ставит на паузу |
+| `Timer for work: Сброс` | останавливает и сбрасывает на начало работы |
+| `Timer for work: Настроить интервалы` | спрашивает время работы и отдыха |
+| `Timer for work: Статистика по проектам` | показывает время по проектам и циклы за сегодня |
+| `Timer for work: Очистить статистику` | удаляет всю сохранённую статистику |
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Настройки
 
-## Extension Settings
+| Параметр | По умолчанию | Описание |
+|---|---|---|
+| `timerForWork.workMinutes` | 25 | длительность работы, мин |
+| `timerForWork.breakMinutes` | 5 | длительность отдыха, мин |
+| `timerForWork.idleMinutes` | 3 | через сколько минут бездействия ставить паузу |
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Как запустить
 
-For example:
+```bash
+npm install
+npm run compile
+```
 
-This extension contributes the following settings:
+Открыть папку в VS Code и нажать `F5` - откроется окно Extension Development Host с плагином.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Собрать установочный файл:
 
-## Known Issues
+```bash
+npm install -g @vscode/vsce
+vsce package
+```
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Получится `timer-for-work-0.0.1.vsix`, его можно установить через Extensions -> `...` -> Install from VSIX.
 
-## Release Notes
+## Структура
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+```
+src/
+  extension.ts   - основной код: таймер, строка состояния, команды, отслеживание активности
+  stats.ts       - класс Stats: учёт времени по проектам и сохранение
+package.json     - манифест (команды, настройки, события активации)
+```
