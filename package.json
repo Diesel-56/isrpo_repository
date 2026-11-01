@@ -30,6 +30,10 @@
       {
         "command": "timer-for-work.setIntervals",
         "title": "Timer for work: Настроить интервалы"
+      },
+      {
+        "command": "timer-for-work.showStats",
+        "title": "Timer for work: Статистика по проектам"
       }
     ],
     "configuration": {

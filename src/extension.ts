@@ -2,11 +2,14 @@
 // Шувалов Михаил Робертович, группа М3110
 
 import * as vscode from 'vscode';
+import { Stats } from './stats';
 
 // режим таймера: работа или отдых
 type Mode = 'work' | 'break';
 
 let statusBar: vscode.StatusBarItem;
+
+let stats: Stats;
 
 let mode: Mode = 'work';
 let secondsLeft = 0;
@@ -25,6 +28,12 @@ function getConfig() {
 	};
 }
 
+function getProjectName(): string {
+	if (vscode.workspace.name) {
+		return vscode.workspace.name;
+	}
+	return 'Без проекта';
+}
 
 // перевод секунд в формат мм:сс
 function formatTime(sec: number): string {
@@ -45,10 +54,10 @@ function updateStatusBar() {
 	if (!running) {
 		text = '(пауза) ' + text;
 		statusBar.command = 'timer-for-work.start';
-		statusBar.tooltip = 'Нажмите, чтобы запустить таймер';
+		statusBar.tooltip = pausedByIdle ? 'Пауза из-за бездействия. Нажмите, чтобы продолжить' : 'Нажмите, чтобы запустить таймер';
 	} else {
 		statusBar.command = 'timer-for-work.pause';
-		statusBar.tooltip = pausedByIdle ? 'Пауза из-за бездействия. Нажмите, чтобы продолжить' : 'Нажмите, чтобы запустить таймер';
+		statusBar.tooltip = 'Проект: ' + getProjectName() + '. Нажмите для паузы';
 	}
 	statusBar.text = text;
 }
@@ -95,12 +104,14 @@ function tick() {
 			vscode.window.showWarningMessage('Timer for work: вы давно ничего не делали, таймер поставлен на паузу');
 			return;
 		}
+		stats.addSecond(getProjectName());
 	}
 
 	secondsLeft--;
 
 	if (secondsLeft <= 0) {
 		if (mode === 'work') {
+			stats.addCycle();
 			mode = 'break';
 			secondsLeft = config.break * 60;
 			vscode.window.showInformationMessage('Работа закончена! Время отдохнуть ' + config.break + ' мин.');
@@ -160,8 +171,37 @@ function checkNumber(value: string): string | undefined {
 	return undefined;
 }
 
+// показываем статистику по проектам
+function showStats() {
+	const projects = stats.getProjects();
+	const items: vscode.QuickPickItem[] = [];
+
+	items.push({
+		label: 'Сегодня завершено циклов: ' + stats.getTodayCycles(),
+		description: 'всего ' + Stats.formatHours(stats.getTodaySeconds())
+	});
+
+	const names = Object.keys(projects);
+	// сортируем по времени, сначала самые большие
+	names.sort((a, b) => projects[b] - projects[a]);
+
+	for (const name of names) {
+		items.push({
+			label: name,
+			description: Stats.formatHours(projects[name])
+		});
+	}
+
+	if (names.length === 0) {
+		items.push({ label: 'Пока нет данных, запустите таймер' });
+	}
+
+	vscode.window.showQuickPick(items, { title: 'Timer for work - время по проектам' });
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Timer for work запущен');
+	stats = new Stats();
 
 	secondsLeft = getConfig().work * 60;
 
@@ -176,7 +216,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('timer-for-work.start', startTimer),
 		vscode.commands.registerCommand('timer-for-work.pause', pauseTimer),
 		vscode.commands.registerCommand('timer-for-work.stop', resetTimer),
-		vscode.commands.registerCommand('timer-for-work.setIntervals', setIntervals)
+		vscode.commands.registerCommand('timer-for-work.setIntervals', setIntervals),
+		vscode.commands.registerCommand('timer-for-work.showStats', showStats)
 	);
 
 	// следим за действиями пользователя
