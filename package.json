@@ -46,6 +46,12 @@
           "default": 5,
           "minimum": 1,
           "description": "Длительность отдыха (в минутах)"
+        },
+        "timerForWork.idleMinutes": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "description": "Через сколько минут без действий таймер встанет на паузу"
         }
       }
     }

@@ -11,6 +11,8 @@ let statusBar: vscode.StatusBarItem;
 let mode: Mode = 'work';
 let secondsLeft = 0;
 let running = false;
+let pausedByIdle = false; // true если пауза включилась сама из-за бездействия
+let lastActivity = Date.now(); // время последнего действия пользователя
 let interval: NodeJS.Timeout | undefined;
 
 // читаем настройки
@@ -18,7 +20,8 @@ function getConfig() {
 	const config = vscode.workspace.getConfiguration('timerForWork');
 	return {
 		work: config.get<number>('workMinutes', 25),
-		break: config.get<number>('breakMinutes', 5)
+		break: config.get<number>('breakMinutes', 5),
+		idle: config.get<number>('idleMinutes', 3)
 	};
 }
 
@@ -45,7 +48,7 @@ function updateStatusBar() {
 		statusBar.tooltip = 'Нажмите, чтобы запустить таймер';
 	} else {
 		statusBar.command = 'timer-for-work.pause';
-		statusBar.tooltip = 'Нажмите для паузы';
+		statusBar.tooltip = pausedByIdle ? 'Пауза из-за бездействия. Нажмите, чтобы продолжить' : 'Нажмите, чтобы запустить таймер';
 	}
 	statusBar.text = text;
 }
@@ -55,6 +58,8 @@ function startTimer() {
 		return;
 	}
 	running = true;
+	pausedByIdle = false;
+	lastActivity = Date.now();
 	interval = setInterval(tick, 1000);
 	updateStatusBar();
 }
@@ -70,6 +75,7 @@ function pauseTimer() {
 
 function resetTimer() {
 	pauseTimer();
+	pausedByIdle = false;
 	mode = 'work';
 	secondsLeft = getConfig().work * 60;
 	updateStatusBar();
@@ -78,6 +84,18 @@ function resetTimer() {
 // вызывается каждую секунду
 function tick() {
 	const config = getConfig();
+
+	// проверяем бездействие во время работы
+	if (mode === 'work') {
+		const idleSeconds = (Date.now() - lastActivity) / 1000;
+		if (idleSeconds > config.idle * 60) {
+			pauseTimer();
+			pausedByIdle = true;
+			updateStatusBar();
+			vscode.window.showWarningMessage('Timer for work: вы давно ничего не делали, таймер поставлен на паузу');
+			return;
+		}
+	}
 
 	secondsLeft--;
 
@@ -94,6 +112,16 @@ function tick() {
 	}
 
 	updateStatusBar();
+}
+
+// любое действие пользователя в редакторе
+function onActivity() {
+	lastActivity = Date.now();
+	// если пауза была из-за бездействия - продолжаем сами
+	if (pausedByIdle && !running) {
+		startTimer();
+		vscode.window.showInformationMessage('Timer for work: с возвращением! Таймер снова идёт');
+	}
 }
 
 // Настройка интервалов через окно ввода
@@ -149,6 +177,18 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('timer-for-work.pause', pauseTimer),
 		vscode.commands.registerCommand('timer-for-work.stop', resetTimer),
 		vscode.commands.registerCommand('timer-for-work.setIntervals', setIntervals)
+	);
+
+	// следим за действиями пользователя
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(onActivity),
+		vscode.window.onDidChangeTextEditorSelection(onActivity),
+		vscode.window.onDidChangeActiveTextEditor(onActivity),
+		vscode.window.onDidChangeWindowState((state) => {
+			if (state.focused) {
+				onActivity();
+			}
+		})
 	);
 
 	// если поменяли настройки, а таймер стоит - сразу обновляем время
