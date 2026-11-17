@@ -28,13 +28,16 @@ int main() {
     check(square(0) == 0, "square: zero");
     check(square(1) == 1, "square: one");
     check(square(100) == 10000, "square: large input");
-    check(square(-5) == 25, "square: negative input (current behavior)");
+    check(square(-5) == -1, "square: negative input (current behavior)");
 
     check(almost_equal(triangle(4, 3), 6.0), "triangle: normal input");
     check(almost_equal(triangle(2.5, 3), 3.75), "triangle: fractional input");
     check(almost_equal(triangle(0, 5), 0), "triangle: zero height");
     check(almost_equal(triangle(5, 0), 0), "triangle: zero base");
     check(almost_equal(triangle(1, 1), 0.5), "triangle: unit dimensions");
+    check(almost_equal(triangle(-4, 3), -1), "triangle: negative height");
+    check(almost_equal(triangle(4, -3), -1), "triangle: negative base");
+    check(almost_equal(triangle(-4, -3), -1), "triangle: both negative");
 
     std::cout << "Result: " << passed << " passed, " << failed << " failed\n";
     return failed == 0 ? 0 : 1;

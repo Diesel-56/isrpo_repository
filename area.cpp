@@ -2,7 +2,10 @@
 
 int square(int x) {
     // Принимаем число x на вход и возвращаем квадрат этого числа
-    return x * x;
+    if (x >= 0) {
+        return x * x;
+    }
+    return -1; // не верный ввод
 }
 
 double triangle(double h, double n) {
@@ -16,7 +19,10 @@ double triangle(double h, double n) {
     Возвращаемое значение:
         double - площадь треугольника в виде вещественного числа
     */
-    return h * n / 2;
+    if (h >= 0 && n >= 0) {
+        return h * n / 2;
+    }
+    return -1; // не верный ввод
 }
 
 int main() {

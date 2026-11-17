@@ -9,7 +9,7 @@ g++ -std=c++17 -Wall -Wextra -pedantic tests.cpp -o tests
 ./tests
 ```
 
-Ожидаемый итог: `Result: 10 passed, 0 failed`.
+Ожидаемый итог: `Result: 13 passed, 0 failed`.
 
 ## **_Ссылка на репозиторий_**
 
